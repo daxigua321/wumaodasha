@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#020d24">
+  <meta name="description" content="上海有色金属交易中心楼宇智慧管理可视化系统，4K高清楼宇与楼层企业联动展示。">
+  <title>上海有色金属交易中心 · 楼宇智慧管理</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/building.png" as="image">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="dashboard" id="dashboard" aria-label="上海有色金属交易中心楼宇智慧大屏">
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+    <canvas id="network" class="network" aria-hidden="true"></canvas>
+    <div class="screen-grain" aria-hidden="true"></div>
+
+    <header class="masthead">
+      <div class="brand"><img src="assets/brand.svg" alt="交易中心标志"><span>楼宇智慧管理可视化系统</span></div>
+      <div class="title-frame"><i class="title-notch left" aria-hidden="true"></i><h1>上海有色金属交易中心</h1><i class="title-notch right" aria-hidden="true"></i></div>
+      <div class="metrics" aria-label="楼宇概况">
+        <div class="metric"><span>总楼层</span><p><strong data-value="30">30</strong><em>层</em></p></div>
+        <div class="metric"><span>入驻企业</span><p><strong data-value="128">128</strong><em>家</em></p></div>
+        <div class="metric"><span>入驻率</span><p><strong data-value="92.6" data-decimals="1">92.6</strong><em>%</em></p></div>
+        <div class="metric metric-area"><span>在管面积</span><p><strong data-value="62000">62000</strong><em>m²</em></p></div>
+      </div>
+      <div class="header-light" aria-hidden="true"></div>
+    </header>
+
+    <section class="building-panel panel" aria-label="交互式楼宇楼层模型">
+      <div class="scene-glow" aria-hidden="true"></div>
+      <div class="building-asset" id="buildingAsset"><img id="buildingImage" src="assets/building.png" alt="上海有色金属交易中心白色高层建筑与裙楼，三分之四正面视角" draggable="false"></div>
+      <svg class="floors-svg" id="floorsSvg" viewBox="0 0 924 876" aria-hidden="true">
+        <defs>
+          <linearGradient id="slabFill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#58edff" stop-opacity=".07"/><stop offset=".5" stop-color="#12baff" stop-opacity=".22"/><stop offset="1" stop-color="#52eaff" stop-opacity=".54"/></linearGradient>
+          <linearGradient id="slabEdge"><stop stop-color="#2bdfff" stop-opacity=".2"/><stop offset=".48" stop-color="#38deff"/><stop offset="1" stop-color="#adffff"/></linearGradient>
+          <linearGradient id="connectorLine"><stop stop-color="#16b8ff" stop-opacity=".3"/><stop offset=".75" stop-color="#03c7ff" stop-opacity=".72"/><stop offset="1" stop-color="#e1ffff"/></linearGradient>
+          <filter id="softGlow" x="-40%" y="-300%" width="180%" height="700%"><feGaussianBlur stdDeviation="2.4"/></filter>
+          <filter id="pointGlow" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="3"/></filter>
+        </defs>
+        <g id="floorLayers"></g>
+        <g id="selectedFloorLines"><path id="floorGuide" fill="none" stroke="url(#connectorLine)" stroke-width="1" stroke-dasharray="4 3"/><path id="floorConnector" fill="none" stroke="#36d5ff" stroke-width="1.6"/><circle id="activePointGlow" r="7" fill="#16b7ff" filter="url(#pointGlow)"/><circle id="activePoint" r="3" fill="#efffff"/></g>
+        <g id="floorHitAreas"></g>
+      </svg>
+      <div class="floor-ruler" id="floorRuler" role="group" aria-label="选择楼层"></div>
+      <div class="floor-callout" id="floorCallout"><div class="callout-number"><i aria-hidden="true"></i><strong id="selectedFloorNumber">15</strong><span>层</span></div><div class="callout-company" id="selectedFloorCompany">有色金属企业服务中心</div></div>
+      <div class="building-scan" aria-hidden="true"></div>
+      <div class="scene-toolbar" aria-label="展示控制">
+        <button id="tourButton" class="tool-button is-active" aria-label="暂停自动巡层" aria-pressed="true" title="暂停自动巡层"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6v12M16 6v12"/></svg><span>自动巡层</span></button>
+        <button id="replayButton" class="tool-button icon-only" aria-label="重播进场动画" title="重播进场动画"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8A8 8 0 1 1 4 14M5 3v6h6"/></svg></button>
+        <button id="fullscreenButton" class="tool-button icon-only" aria-label="全屏展示" title="全屏展示"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5"/></svg></button>
+      </div>
+      <div class="legend" aria-label="楼层状态图例"><span><i class="occupied"></i>已入驻</span><span><i class="vacant"></i>待出租</span><span><i class="maintenance"></i>维修中</span></div>
+    </section>
+
+    <section class="enterprise-panel panel" aria-labelledby="enterpriseHeading">
+      <div class="panel-heading"><h2 id="enterpriseHeading"><i aria-hidden="true"></i>楼层企业展示</h2><div class="heading-line" aria-hidden="true"></div></div>
+      <div class="floor-tabs" role="tablist" aria-label="按楼层分组">
+        <button id="tab-all" role="tab" aria-controls="enterpriseGrid" aria-selected="false" tabindex="-1" data-range="all">全部楼层</button>
+        <button id="tab-low" role="tab" aria-controls="enterpriseGrid" aria-selected="false" tabindex="-1" data-range="low">1–10层</button>
+        <button id="tab-mid" role="tab" aria-controls="enterpriseGrid" aria-selected="true" tabindex="0" data-range="mid">11–20层</button>
+        <button id="tab-high" role="tab" aria-controls="enterpriseGrid" aria-selected="false" tabindex="-1" data-range="high">21–30层</button>
+      </div>
+      <div id="enterpriseGrid" class="enterprise-grid" role="tabpanel" aria-labelledby="tab-mid"></div>
+      <div class="services" aria-label="楼宇配套服务">
+        <div class="service"><span class="service-icon"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M6 10h16v13H6zM9 10V6h10v4M6 14h16M10 17v3M18 17v3"/><circle cx="21" cy="21" r="4"/><path d="m19.5 21 1 1 2-2"/></svg></span><span>办公配套</span></div>
+        <div class="service"><span class="service-icon"><svg viewBox="0 0 28 28" aria-hidden="true"><circle cx="14" cy="7" r="3"/><circle cx="6" cy="12" r="2"/><circle cx="22" cy="12" r="2"/><path d="M10 14v-1a4 4 0 0 1 8 0v1M3 20v-2a3 3 0 0 1 6 0m10 0a3 3 0 0 1 6 0v2M8 18h12v6H8z"/></svg></span><span>会议服务</span></div>
+        <div class="service"><span class="service-icon"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M6 9h16v15H6zM10 9V5h8v4M10 14h2m4 0h2m-8 4h2m4 0h2M12 24v-3h4v3"/></svg></span><span>商务配套</span></div>
+        <div class="service"><span class="service-icon"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M7 11V6m3 5V6m-6 0v5a3 3 0 0 0 6 0M7 14v10M20 6c-5 2-5 10 0 10V6Zm0 10v8"/></svg></span><span>休闲配套</span></div>
+        <div class="service"><span class="service-icon"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M6 11h16l-1 13H7L6 11Zm4 0V8a4 4 0 0 1 8 0v3"/><path d="M11 15v2m6-2v2m-6 3h6"/></svg></span><span>生活配套</span></div>
+        <div class="service"><span class="service-icon"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="m14 4 2 3 4-1 1 4 3 2-2 4 1 4-4 1-3 3-3-2-4 1-1-4-3-2 2-4-1-4 4-1 2-3Z"/><circle cx="14" cy="14" r="4"/></svg></span><span>智慧服务</span></div>
+      </div>
+    </section>
+    <div class="screen-footnote">数据按参考图展示</div>
+    <div class="sr-only" id="selectionAnnouncement" role="status" aria-live="polite"></div>
+  </main>
+</body>
+</html>
